@@ -9,10 +9,10 @@ let edge_size = w*0.05;
 let x_size, y_size;
 
 //To time it
+let last_frame = 0;
+let frame_period = 30;  // 30-> ~30 fps
 let last_cycle = 0;
 let period = 250; //in ms
-let last_frame = 0;
-let frame_period = 20;  // <60 fps
 
 //Game states ()
 let game_state = 0;
@@ -51,6 +51,8 @@ function setup() {
       drawcell(i, j);
     }
   }
+
+  period = period - (period%frame_period);  //Multiple--> smoother
 
   createElement('br').parent('sketch-holder');  //Forces next line
   //Control items
@@ -232,9 +234,9 @@ function keyReleased(){
       //Space
     case 32: game_state = !game_state; updateButtonImage(); break;
       //RightArrow
-    case 39: period -= 20; break;
+    case 39: period -= frame_period; break; //so that it is a multiple
       //LeftArrow
-    case 37: period += 20; break;
+    case 37: period += frame_period; break;
       //F
     case 70: random_fill();break;
       //R
