@@ -18,6 +18,7 @@ let game_state = 0;
 let once = true; //In case setup gets called later
 let shape_select;
 let rotate;
+let play_button;
 
 function setup() {
   // createCanvas(640, 300);
@@ -28,6 +29,7 @@ function setup() {
   desired_h = desired_h-(desired_h%w);
 
   let cnv = createCanvas(desired_w, desired_h);
+  cnv.parent('sketch-holder');
   background(0);
   strokeWeight(edge_size);  //Edge size
   stroke(0);  //Edge color
@@ -46,16 +48,35 @@ function setup() {
   }
 
   if(once){
+    createElement('br').parent('sketch-holder');  //Forces next line
     //Control items
+    
+    //Play button:
+    play_button = createButton('<i class="fa fa-play"></i>');
+    play_button.parent('sketch-holder'); //Moves it inside that part of the html
+    play_button.mousePressed(play_pause);
+    play_button.style('font-size', '24px');
+    play_button.style('border', 'none');
+    play_button.style('background', 'none');
+    // play_button.style('color', 'rgba(140, 221, 0, 1)');
+    play_button.style('cursor', 'pointer');
+    //Position
+    play_button.style('position', 'relative'); // move relative to its normal spot
+    play_button.style('top', '5px');
+    // play_button.style('left', '20px');
+    play_button.style('right', '20px');
+    updateButtonImage();
+
     //Shapes:
     shape_select = createSelect();
+    shape_select.parent('sketch-holder');
     shape_select.option('CELL');
     shape_select.option('WALKER');
     shape_select.option('SPACESHIFT');
-    shape_select.changed(change_shape);
     
     //Rotate:
     rotate = createSelect();
+    rotate.parent('sketch-holder');
     rotate.option(0);
     rotate.option(90);
     rotate.option(180);
@@ -63,8 +84,16 @@ function setup() {
   }
   once = false;
 }
-function change_shape(){
-  
+
+function play_pause(){
+  game_state = !game_state;
+  updateButtonImage();
+}
+
+function updateButtonImage(){
+  // Using a css font:
+  play_button.html(game_state ? '<i class="fa fa-pause"></i>' : '<i class="fa fa-play"></i>');
+  play_button.style('color', game_state? 'rgba(223, 108, 1, 1)': 'rgba(140, 221, 0, 1)');
 }
 
 function draw() {
@@ -142,7 +171,7 @@ function keyReleased(){
   switch(keyCode){
       //Codes in https://www.toptal.com/developers/keycode
       //Space
-    case 32: game_state = !game_state; break;
+    case 32: game_state = !game_state; updateButtonImage(); break;
       //RightArrow
     case 39: period -= 20; break;
       //LeftArrow
