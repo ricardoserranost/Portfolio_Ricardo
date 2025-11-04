@@ -4,24 +4,33 @@ let cells_next;
 // Starting at generation 0
 let generation = 0;
 // Cell size
-let w = 10;
+let w = 16;
+let edge_size = w*0.05;
 
 //To time it
 let last_cycle = 0;
-let period = 300; //in ms
+let period = 250; //in ms
 
 //Game states ()
 let game_state = 0;
 
+//Control items:
+let once = true; //In case setup gets called later
+let shape_select;
+let rotate;
+
 function setup() {
   // createCanvas(640, 300);
   // Dynamic sizing, with no extra blank space:
-  let desired_w = windowWidth-(windowWidth%w);
-  let desired_h = windowHeight*0.75; // Scale to desired part of page
+  let desired_w = windowWidth*0.95;
+  desired_w = desired_w-(desired_w%w);
+  let desired_h = windowHeight*0.7; // Scale to desired part of page
   desired_h = desired_h-(desired_h%w);
 
-  createCanvas(desired_w, desired_h);
+  let cnv = createCanvas(desired_w, desired_h);
   background(0);
+  strokeWeight(edge_size);  //Edge size
+  stroke(0);  //Edge color
   x_size = floor(width / w);
   y_size = floor(height/w);
   cells = new Array(x_size);
@@ -35,12 +44,34 @@ function setup() {
       drawcell(i, j);
     }
   }
+
+  if(once){
+    //Control items
+    //Shapes:
+    shape_select = createSelect();
+    shape_select.option('CELL');
+    shape_select.option('WALKER');
+    shape_select.option('SPACESHIFT');
+    shape_select.changed(change_shape);
+    
+    //Rotate:
+    rotate = createSelect();
+    rotate.option(0);
+    rotate.option(90);
+    rotate.option(180);
+    rotate.option(270);
+  }
+  once = false;
+}
+function change_shape(){
+  
 }
 
 function draw() {
   let ms = millis();
   
   if(game_state == 1){
+    //RUNNING
     if(ms-last_cycle > period){
       nextstep();
       for (let i = 0; i < x_size; i++) {
@@ -51,16 +82,60 @@ function draw() {
       }
       last_cycle = ms;
     }
+  }else{
+    noFill();
+    stroke("rgba(250, 129, 0, 1)");
+    strokeWeight(w*0.8);
+    rect(0, 0, width, height);
+    strokeWeight(edge_size); //Return to normal
+    stroke(0);
   }
 }
 
 //Events
 function mouseClicked(){
-  fill(0);
-  let x = floor(mouseX/w);
-  let y = floor(mouseY/w);
-  cells[x][y] = !cells[x][y];
-  drawcell(x, y);
+  //Only in the canvas:
+  if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+    // Depends on the shape selected:
+    fill(0);
+    let x = floor(mouseX/w);
+    let y = floor(mouseY/w);
+    if(shape_select.value()=='CELL'){
+      cells[x][y] = !cells[x][y];
+      drawcell(x, y);
+    }else{
+      paint_shape(x, y);
+    }
+  }
+}
+
+function paint_cell(i, j){
+  // set specific cell as live
+  i = i%x_size;
+  j = j%y_size;
+  cells[i][j] = 1;
+  drawcell(i, j);
+}
+
+//DIFFERENT SHAPES:
+function paint_shape(x, y, increments){
+  switch(shape_select.value()){
+    case 'WALKER': increments = [
+      [0, 0], [1, 0], [0, 1], [0, 2], [2, 1]];break;
+    case 'SPACESHIFT': increments = [
+      [0, 0], [0, 1], [0, 2], [1, 0], [2, 0], [3, 0], [4, 1], [1, 3], [4, 3]];break;
+  }
+
+
+  for(let increment of increments){
+    switch(rotate.value()){
+      case '0':   paint_cell(x + increment[0], y + increment[1]);break;
+      case '90':  paint_cell(x + increment[1], y - increment[0]);break;
+      case '180': paint_cell(x - increment[0], y - increment[1]);break;
+      case '270': paint_cell(x - increment[1], y + increment[0]);break;
+    }
+    
+  }
 }
 
 function keyReleased(){
@@ -138,7 +213,7 @@ function change_cell_size(increase){
     w+=1;
   }else{
     w-=1;
-    if(w<1) w = 1;
+    if(w<2) w = 2;
   }
   setup();
 }
