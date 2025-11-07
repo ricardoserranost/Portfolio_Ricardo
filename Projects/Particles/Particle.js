@@ -15,14 +15,15 @@ class Particle{
 
     update(){
         // Viscosity:
-        if(this.viscosity>0.0){
+        if(this.viscosity>0.0 && this.acc.x>0.05){
+            // Only with a min acc, if not some become static. Gives a cool jitter
             let drag = this.vel.copy().mult(-this.viscosity);
             this.acc.add(drag);
         };
 
         //Actual update terms:
-        this.pos.add(this.vel);
         this.vel.add(this.acc);
+        this.pos.add(this.vel);
 
         // Edge bounce:
         if(this.bouncy){
@@ -51,26 +52,47 @@ class Particle{
         this.acc.set(0, 0);
     }
 
-    attractGravity(attrPos, force_const = 9.8, repulsiveLimit=5.0, effectLimit=100){
-        // If it's close, it will reppel;
-        let dir = p5.Vector.sub(attrPos, this.pos);
-        let distance = dir.mag();
-        if(distance<effectLimit){
-            let strength = force_const*this.mass / (distance*distance);
-            let force = dir.normalize().mult(strength);
-            if(distance<repulsiveLimit) force = -force;
-            this.acc.add(force);
-        }
+    attractGravity(attrPos, force_const = 9.8, repulsiveLimit = 5.0, effectLimit = 800) {
+        // Compute vector difference
+        let dx = attrPos.x - this.pos.x;
+        let dy = attrPos.y - this.pos.y;
+        let distSq = dx * dx + dy * dy;
+
+        // Ignore if too far
+        if (distSq > effectLimit * effectLimit) return;
+
+        // Add small epsilon to avoid division by zero
+        let distance = sqrt(distSq) + 0.0001;
+
+        // Compute normalized direction
+        let nx = dx / distance;
+        let ny = dy / distance;
+
+        // Strength (inverse-square law)
+        let strength = (force_const * this.mass) / distSq;
+
+        // Repulsive when too close, limiting its effect
+        if (distance < repulsiveLimit) strength *= -0.05;
+        if(strength<-5.0) strength = -2.0
+
+        // Apply to acceleration
+        this.acc.x += nx * strength;
+        this.acc.y += ny * strength;
     }
 
-    attractLinear(attrPos, initForce=-0.5, slope1=0.0675, dist1=16.0, slope2=0.125, peakForce=4.0, dist2=48.0, slope3=-0.125, maxDist = 80.0){
+    attractLinear(attrPos, initForce=-0.01, slope1=0.0005, dist1=20.0, slope2=0.0025, dist2=100.0, peakForce=0.2, slope3=-0.0025, maxDist = 180.0){
         // Inspired in Particle Life
         // (Linear with shape /\_)
         // (compute slopes out of this function to be faster)
-        let dir = p5.Vector.sub(attrPos, this.pos);
-        let distance = dir.mag();
-        let strength;
-        if(distance<maxDist){
+        let dx = attrPos.x - this.pos.x;
+        let dy = attrPos.y - this.pos.y;
+        let distSq = dx*dx + dy*dy; // Use Squares to save computation
+
+        if(distSq > 1e-6 && distSq<maxDist*maxDist){
+            let distance = sqrt(distSq);
+            let nx = dx / distance;
+            let ny = dy / distance;
+            let strength;
             if(distance<dist1){
                 strength = initForce+distance*slope1;
             }else if(distance<dist2){
@@ -78,9 +100,9 @@ class Particle{
             }else{
                 strength = peakForce+(distance-dist2)*slope3;
             }
-            let force = dir.normalize().mult(strength);
-            this.acc.add(force);
+            // Apply to acceleration
+            this.acc.x += nx * strength;
+            this.acc.y += ny * strength;
         }
-        
     }
 }
