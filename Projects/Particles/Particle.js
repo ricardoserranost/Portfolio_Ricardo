@@ -10,16 +10,21 @@ class Particle{
 
         this.attractRadius = 100;
         this.mass = 1.0;
-        this.viscosity = 0.0;   // (1-coeff_viscosity) for easier comput
+        // viscosity taken from global params for easier comput
     }
 
     update(){
         // Viscosity:
-        if(this.viscosity>0.0 && this.acc.x>0.05){
+        if(params.viscosity>0.0 /*&& this.acc.x>0.005*/){
             // Only with a min acc, if not some become static. Gives a cool jitter
-            let drag = this.vel.copy().mult(-this.viscosity);
-            this.acc.add(drag);
-        };
+            // Add that condition only if the forces can go to inf like gravity.
+            // If they have a limit like in the Particle Life sim, it's not necessary
+            // const drag = this.vel.copy().mult(-params.viscosity);
+            // this.acc.add(drag);
+
+            // Although less accurate, this approximation helps with perf:
+            this.vel.mult(1-params.viscosity);
+        }
 
         //Actual update terms:
         this.vel.add(this.acc);
@@ -43,9 +48,9 @@ class Particle{
     }
 
     show(){
-        noStroke();
-        fill(this.colorFill);
-        circle(this.pos.x, this.pos.y, this.radius);
+        // noStroke();
+        // fill(this.colorFill);
+        ellipse(this.pos.x, this.pos.y, this.radius); //could use point for smaller
     }
 
     resetAcc(){
