@@ -49,8 +49,8 @@ function setup(){
 
     //MENU:
     pane = new Tweakpane.Pane({ title: 'Particle Controls' });
-    pane.addButton({title: '🔄 Clear particles'}).on('click', ()=>clearParticles());
-    pane.addButton({title: '➕ Add particles'}).on('click', ()=>createRandomParticles(50));
+    pane.addButton({title: '🔄 Clear particles (R)'}).on('click', ()=>clearParticles());
+    pane.addButton({title: '➕ Add particles (F)'}).on('click', ()=>createRandomParticles(50));
 
     pane.addInput(params, 'viscosity', { min: 0, max: 0.3, step: 0.001, label:'Viscosity' });
     pane.addInput(params, 'maxRadio', { min: 1, max: 300, step: 1, label:'Maximum Radio' })
