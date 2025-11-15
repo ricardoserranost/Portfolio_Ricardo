@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractal</title>
+    <!-- Load p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    
+    <style>
+        body {
+        margin: 0;
+        text-align: center;
+        background-color: #1e1e1e;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        }
+        h1 { margin-top: 20px; }
+
+        .tp-dfwv {
+        position: absolute !important;
+        top: 10px;
+        right: 10px;
+        opacity: 0.9;
+        z-index: 10;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Fractal</h1>
+    <!-- Create a parent to allign the canvas buttons etc: -->
+    <div id="sketch-holder" style="text-align:center;"></div>
+    <!-- For special font (play button etc)-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Load Tweakpane to make menus etc-->
+    <script src="https://cdn.jsdelivr.net/npm/tweakpane@3.1.0/dist/tweakpane.min.js"></script>
+
+    <!-- Load project: -->
+    <script src="Fractal.js"></script>
+</body>
+</html>
