@@ -21,10 +21,10 @@ function setup(){
     background(0);
 
     pane = new Tweakpane.Pane({title: 'Settings'});
-    pane.addInput(params, 'iterations', { min: 0, max: 10000, step: 1, label:'Iterations' })
+    pane.addInput(params, 'iterations', { min: 0, max: 5000, step: 1, label:'Iterations' })
         .on('change', ()=>clearAndDraw());
-
-
+    pane.addButton({title: '>'}).on('click', ()=>addPoints(1));
+    pane.addButton({title: '<'}).on('click', ()=>addPoints(-1));
     // Three points:
     computeVertices(triangleRadio);
     fill("rgba(255, 255, 255, 1)");
@@ -35,18 +35,22 @@ function setup(){
 
     origin = new createVector(0, 0);
     drawOrigin();
-    
     computePoints();
     drawFractal();
+    clearAndDraw();
 }
 
 function draw(){
+}
 
+function addPoints(n){
+    params.iterations = params.iterations + n;
+    if(params.iterations<0) params.iterations = 0;
+    pane.refresh();
+    clearAndDraw();
 }
 
 function clearAndDraw(){
-    points = [];
-    currentN=0;
     computePoints();
     background(0);
     drawOrigin();
@@ -59,14 +63,15 @@ function clearAndDraw(){
 function drawFractal(){
     fill("rgba(255, 255, 255, 1)");
     strokeWeight(0.1);
-    for(p of points){ 
-        circle(width/2 + p.x, height/2 + p.y, 1);
+    for(let i=0; i<params.iterations; i++){
+        circle(width/2 + points[i].x, height/2 + points[i].y, 1);
     }
 }
 
 function computePoints(){
     let p = origin;
     let p2 = origin;
+    if(points.length>0) p = points[points.length-1];
     while(currentN<params.iterations){
         p2 = random(vertices);
         p = new createVector((p.x + p2.x)/2, (p.y + p2.y)/2);
@@ -75,14 +80,22 @@ function computePoints(){
     }
 }
 
-function mouseClicked(){
+function mouseClicked(e){
+    if (e.target.closest('.tp-dfwv') !== null) {
+        return;
+    }
+
     if(mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
         origin = new createVector(mouseX-width/2, mouseY-height/2);
         // drawOrigin();
+
+        points = [];
+        currentN=0;
         clearAndDraw();
     }
     
 }
+
 
 function drawOrigin(){
     fill("rgba(115, 255, 0, 1)");
