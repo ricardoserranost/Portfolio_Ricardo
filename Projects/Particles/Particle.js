@@ -15,7 +15,8 @@ class Particle{
 
     update(){
         // Viscosity:
-        if(params.viscosity>0.0 /*&& this.acc.x>0.005*/){
+        if(params.viscosity>0.0){
+            /*&& this.acc.x>0.005*/
             // Only with a min acc, if not some become static. Gives a cool jitter
             // Add that condition only if the forces can go to inf like gravity.
             // If they have a limit like in the Particle Life sim, it's not necessary
