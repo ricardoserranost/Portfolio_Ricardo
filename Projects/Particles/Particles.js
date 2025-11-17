@@ -14,17 +14,17 @@ let lastForcesPeriod = 0;
 const drawPeriod = 30;
 let lastDrawPeriod = 0;
 
-let stdRadius = 3
-
 //At some point they'll be different for each pair of particle types:
 let initForce, slope1, dist1, slope2, dist2, peakForce, slope3, maxDist;
 
 const maxForce = 0.01; // Then the forces can be relative to this one
 
-// For a MENU:
+let systems = [];
 
+// For a MENU:
 let pane;
 let params = {
+    stdRadius: 2.5,
     attraction: 0.3,
     initAttraction: -0.3,
     viscosity: 0.008,   // (1-coeff_viscosity) for easier computation
@@ -48,35 +48,35 @@ function setup(){
     pane.addButton({title: '➕ Add particles (F)'}).on('click', ()=>createRandomParticles(50));
 
     pane.addInput(params, 'viscosity', { min: 0, max: 0.3, step: 0.001, label:'Viscosity' });
-    pane.addInput(params, 'maxRadio', { min: 1, max: 300, step: 1, label:'Maximum Radio' })
+    pane.addInput(params, 'maxRadio', { min: 1, max: 300, step: 1, label:'Effect Radio' })
         .on('change', ev => {
         // optional: mirror to globals if you want
         maxRadio = ev.value;
         updateForceParams();
     });
-    pane.addInput(params, 'firstRadio', { min: 1, max: 300, step: 1, label:'First Radio' })
+    pane.addInput(params, 'firstRadio', { min: 1, max: 300, step: 1, label:'Resting Radio' })
         .on('change', ev => {
         // optional: mirror to globals if you want
         firstRadio = ev.value;
         updateForceParams();
     });
-    pane.addInput(params, 'attraction', { min: -1, max: 1, step: 0.01 , label:'Attraction'})
+    pane.addInput(params, 'attraction', { min: -1, max: 1, step: 0.01 , label:'Far Attraction'})
         .on('change', ev => {
         // optional: mirror to globals if you want
         attraction = ev.value;
         updateForceParams();
     });
 
-    pane.addInput(params, 'initAttraction', { min: -1, max: 1, step: 0.01, label:'Initial Attraction' })
+    pane.addInput(params, 'initAttraction', { min: -1, max: 1, step: 0.01, label:'Close Attraction' })
         .on('change', ev => {
         // optional: mirror to globals if you want
         initAttraction = ev.value;
         updateForceParams();
     });
 
-    system1 = new ParticleSystem(500, 'rgba(21, 255, 0, 1)');
-    system2 = new ParticleSystem(500, 'rgba(255, 0, 123, 1)');
-    system1.addRelatedSystem(system2);
+    addSystem('rgba(21, 255, 0, 1)', 200);
+    addSystem('rgba(255, 0, 123, 1)', 200);
+    addSystem('rgba(0, 200, 255, 1)', 200);
 }
 
 function isMouseOverTweakpane() {
@@ -99,14 +99,16 @@ function draw(){
     let ms = millis();
     if((ms-lastDrawPeriod)>drawPeriod){
         background(0);  //Get rid of this to leave trace
-        system1.show();
-        system2.show();
+        for(s of systems){
+            s.show();
+        }
 
         if(!isMouseOverTweakpane() && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
             if(mouseIsPressed){
                 //Add particles on a random stroke. Change later to be customizable
-                system1.addParticle(mouseX + random(-1, 1)*10, mouseY + random(-1, 1)*10);
-                system2.addParticle(mouseX + random(-1, 1)*10, mouseY + random(-1, 1)*10);
+                for(s of systems){
+                    s.addParticle(mouseX + random(-1, 1)*10, mouseY + random(-1, 1)*10);
+                }
             }
         }
 
@@ -114,16 +116,18 @@ function draw(){
     }
 
     if((ms-lastUpdatePeriod)>updatePeriod){
-        system1.update();
-        system2.update();
+        for(s of systems){
+            s.update();
+        }
 
         lastUpdatePeriod = ms;
     }
 
     if((ms-lastForcesPeriod)>forcesPeriod){
         // Separate loop for forces to boost performance
-        system1.updateForces();
-        system2.updateForces();
+        for(s of systems){
+            s.updateForces();
+        }
         
         lastForcesPeriod = ms;
     }    
@@ -139,14 +143,22 @@ function keyReleased(){
     }
 }
 
+function addSystem(color, n=0){
+    let newSys = new ParticleSystem(n, color);
+    newSys.addParticles(n);
+    for(s of systems){
+        s.addRelatedSystem(newSys);
+        newSys.addRelatedSystem(s);
+    }
+    systems.push(newSys);
+}
+
 function clearParticles(){
-    system1.clearParticles();
-    system2.clearParticles();
+    for(s of systems) s.clearParticles();
 }
 
 function createRandomParticles(n){
-    system1.addParticles(n);
-    system2.addParticles(n);
+    for(s of systems) s.addParticles(n);
 }
 
 function updateForceParams() {

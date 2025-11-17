@@ -1,11 +1,10 @@
 class Particle{
-    constructor(x, y, vel=[0, 0], acc=[0, 0], radius = 5, bouncy=true){
+    constructor(x, y, vel=[0, 0], acc=[0, 0], bouncy=true){
         this.pos = createVector(x, y);
         this.vel = createVector(vel[0], vel[1]);
         this.acc = createVector(acc[0], acc[1]);
         this.bouncy = bouncy;
         this.bouceCoefficient = 1.0 // Percentage of v kept in bounce
-        this.radius = radius;
         this.colorFill = 'rgba(21, 255, 0, 1)';
 
         this.attractRadius = 100;
@@ -51,7 +50,7 @@ class Particle{
     show(){
         // noStroke();
         // fill(this.colorFill);
-        ellipse(this.pos.x, this.pos.y, this.radius); //could use point for smaller
+        ellipse(this.pos.x, this.pos.y, params.stdRadius); //could use point for smaller
     }
 
     resetAcc(){

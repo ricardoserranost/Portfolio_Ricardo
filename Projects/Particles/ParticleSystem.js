@@ -10,14 +10,14 @@ class ParticleSystem{
 
     addParticles(n){
         for(let i=0; i<n; i++){
-            let newParticle = new Particle(random()*width, random()*height, [0, 0], [0, 0], stdRadius);
+            let newParticle = new Particle(random()*width, random()*height, [0, 0], [0, 0]);
             newParticle.colorFill = this.color;
             this.particles.push(newParticle);
         }
     }
     
     addParticle(x, y){
-        let newParticle = new Particle(x, y, [0, 0], [0, 0], stdRadius);
+        let newParticle = new Particle(x, y, [0, 0], [0, 0]);
         newParticle.colorFill = this.color;
         this.particles.push(newParticle);
     }
